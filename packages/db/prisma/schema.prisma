@@ -1,0 +1,92 @@
+// COSPEC LTD — Prisma Schema
+// PostgreSQL database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  ADMIN
+  OPERADOR
+  TECNICO
+}
+
+enum EstadoReclamo {
+  PENDIENTE
+  ASIGNADO
+  EN_PROGRESO
+  RESUELTO
+  CANCELADO
+}
+
+enum ServicioAfectado {
+  FIBRA_OPTICA
+  ADSL
+  TELEFONIA
+  TV_SENSA
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  nombre    String
+  email     String   @unique
+  password  String
+  rol       Rol
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  reclamosCreados  Reclamo[] @relation("OperadorReclamos")
+  reclamosAsignados Reclamo[] @relation("TecnicoReclamos")
+
+  @@map("usuarios")
+}
+
+model Reclamo {
+  id               String          @id @default(cuid())
+  // Datos del cliente
+  telefono         String
+  nombre           String
+  direccion        String
+  motivo           String
+  servicioAfectado ServicioAfectado
+  // Control de estado
+  estado           EstadoReclamo   @default(PENDIENTE)
+  // Recepción
+  fechaRecepcion   DateTime        @default(now())
+  horaRecepcion    String          // HH:mm
+  // Relación operador
+  operadorId       String
+  operador         Usuario         @relation("OperadorReclamos", fields: [operadorId], references: [id])
+  // Atención técnico
+  tecnicoId        String?
+  tecnico          Usuario?        @relation("TecnicoReclamos", fields: [tecnicoId], references: [id])
+  fechaAsignacion  DateTime?
+  fechaAtencion    DateTime?
+  horaAtencion     String?
+  fallaEncontrada  String?
+  // Metadata
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  materiales MaterialUsado[]
+
+  @@map("reclamos")
+}
+
+model MaterialUsado {
+  id          String  @id @default(cuid())
+  reclamoId   String
+  reclamo     Reclamo @relation(fields: [reclamoId], references: [id], onDelete: Cascade)
+  descripcion String
+  cantidad    Int
+
+  @@map("materiales_usados")
+}
