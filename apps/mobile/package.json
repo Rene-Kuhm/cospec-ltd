@@ -25,7 +25,8 @@
     "@react-navigation/native": "^6.1.0",
     "@cospec/shared-types": "workspace:*",
     "@cospec/shared-utils": "workspace:*",
-    "axios": "^1.7.0"
+    "axios": "^1.7.0",
+    "@react-native-community/netinfo": "^11.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

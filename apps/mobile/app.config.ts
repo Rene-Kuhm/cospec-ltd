@@ -30,6 +30,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       projectId: 'TBD',
     },
   },
-  plugins: ['expo-router', 'expo-secure-store'],
+  plugins: ['expo-router', 'expo-secure-store', 'expo-sqlite'],
   scheme: 'cospec',
 });
