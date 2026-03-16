@@ -24,7 +24,8 @@
     "react-native-screens": "~4.4.0",
     "@react-navigation/native": "^6.1.0",
     "@cospec/shared-types": "workspace:*",
-    "@cospec/shared-utils": "workspace:*"
+    "@cospec/shared-utils": "workspace:*",
+    "axios": "^1.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
