@@ -15,10 +15,27 @@ export default async function DashboardLayout({
       {/* Navbar */}
       <nav className="bg-white border-b border-slate-200 px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="font-bold text-slate-900">COSPEC LTD</span>
-            <span className="text-slate-300">|</span>
-            <span className="text-sm text-slate-500">Sistema de Reclamos</span>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <span className="font-bold text-slate-900">COSPEC LTD</span>
+              <span className="text-slate-300">|</span>
+              <span className="text-sm text-slate-500">Sistema de Reclamos</span>
+            </div>
+            {/* Nav links */}
+            <div className="flex items-center gap-1">
+              <a
+                href="/dashboard"
+                className="text-sm text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Inicio
+              </a>
+              <a
+                href="/dashboard/reclamos"
+                className="text-sm text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Reclamos
+              </a>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-600">

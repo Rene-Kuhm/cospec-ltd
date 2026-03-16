@@ -5,10 +5,8 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Global prefix
   app.setGlobalPrefix('api/v1');
 
-  // Validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -17,9 +15,13 @@ async function bootstrap() {
     }),
   );
 
-  // CORS for web admin
+  // Multi-origin CORS support (comma-separated in CORS_ORIGINS env var)
+  const corsOrigins = process.env['CORS_ORIGINS']
+    ? process.env['CORS_ORIGINS'].split(',').map((o) => o.trim())
+    : [process.env['WEB_URL'] ?? 'http://localhost:3000'];
+
   app.enableCors({
-    origin: process.env['WEB_URL'] ?? 'http://localhost:3000',
+    origin: corsOrigins,
     credentials: true,
   });
 
