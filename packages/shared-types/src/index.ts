@@ -110,3 +110,10 @@ export interface ExportFilter {
   hasta: Date;
   tipo: 'semana' | 'mes';
 }
+
+export interface ReclamoDetalle extends Reclamo {
+  numeroReclamo: string;
+  operador: Pick<Usuario, 'id' | 'nombre'>;
+  tecnico?: Pick<Usuario, 'id' | 'nombre'>;
+  materiales: MaterialUsado[];
+}

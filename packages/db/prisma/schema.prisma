@@ -50,6 +50,7 @@ model Usuario {
 
 model Reclamo {
   id               String          @id @default(cuid())
+  numeroReclamo    String          @unique
   // Datos del cliente
   telefono         String
   nombre           String
