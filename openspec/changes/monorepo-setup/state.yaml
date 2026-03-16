@@ -1,0 +1,27 @@
+change: monorepo-setup
+status: implemented
+updated: "2026-03-16"
+
+phases:
+  - id: phase-1
+    name: Root monorepo config
+    status: done
+  - id: phase-2
+    name: shared-types package
+    status: done
+  - id: phase-3
+    name: shared-utils package
+    status: done
+  - id: phase-4
+    name: Backend + Web app shells
+    status: done
+  - id: phase-5
+    name: Mobile app shell (Expo SDK 55)
+    status: done
+  - id: phase-6
+    name: Root files (.gitignore, README)
+    status: done
+
+artifacts:
+  - apply-progress.md
+  - state.yaml
