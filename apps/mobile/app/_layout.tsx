@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuthContext } from '../src/context/AuthContext';
+import { ConnectivityProvider } from '../src/context/ConnectivityContext';
 import { router, useSegments } from 'expo-router';
 
 function RootNavigator() {
@@ -10,14 +11,9 @@ function RootNavigator() {
 
   useEffect(() => {
     if (isLoading) return;
-
     const inTabsGroup = segments[0] === '(tabs)';
-
-    if (!isAuthenticated && inTabsGroup) {
-      router.replace('/login');
-    } else if (isAuthenticated && !inTabsGroup) {
-      router.replace('/(tabs)');
-    }
+    if (!isAuthenticated && inTabsGroup) router.replace('/login');
+    else if (isAuthenticated && !inTabsGroup) router.replace('/(tabs)');
   }, [isAuthenticated, isLoading, segments]);
 
   return (
@@ -34,7 +30,9 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootNavigator />
+      <ConnectivityProvider>
+        <RootNavigator />
+      </ConnectivityProvider>
     </AuthProvider>
   );
 }
