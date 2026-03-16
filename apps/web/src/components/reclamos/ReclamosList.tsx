@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { EstadoReclamo, ServicioAfectado } from '@cospec/shared-types';
 import { SERVICIO_LABELS, formatFecha } from '@cospec/shared-utils';
 import { useReclamos } from '../../hooks/useReclamos';
@@ -10,11 +11,42 @@ import { EstadoBadge } from './EstadoBadge';
 export function ReclamosList() {
   const [filtroEstado, setFiltroEstado] = useState('');
   const [filtroServicio, setFiltroServicio] = useState('');
+  const [filtroDesde, setFiltroDesde] = useState('');
+  const [filtroHasta, setFiltroHasta] = useState('');
+  const { data: session } = useSession();
 
   const { reclamos, total, isLoading, error } = useReclamos({
     estado: filtroEstado || undefined,
     servicioAfectado: filtroServicio || undefined,
   });
+
+  async function handleExport() {
+    if (!filtroDesde || !filtroHasta) return;
+    if (!session?.accessToken) return;
+    
+    const params = new URLSearchParams({
+      desde: filtroDesde,
+      hasta: filtroHasta,
+      ...(filtroEstado && { estado: filtroEstado }),
+      ...(filtroServicio && { servicioAfectado: filtroServicio }),
+    });
+    
+    const url = `${process.env['NEXT_PUBLIC_API_URL']}/reclamos/export?${params}`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${session.accessToken}` },
+    });
+    
+    if (!res.ok) {
+      alert('Error al exportar');
+      return;
+    }
+    
+    const blob = await res.blob();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `reclamos-${filtroDesde}_a_${filtroHasta}.xlsx`;
+    link.click();
+  }
 
   return (
     <div className="space-y-4">
@@ -41,6 +73,30 @@ export function ReclamosList() {
             <option key={s} value={s}>{SERVICIO_LABELS[s]}</option>
           ))}
         </select>
+
+        <div className="flex gap-2 items-center">
+          <input
+            type="date"
+            value={filtroDesde}
+            onChange={(e) => setFiltroDesde(e.target.value)}
+            className="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Desde"
+          />
+          <input
+            type="date"
+            value={filtroHasta}
+            onChange={(e) => setFiltroHasta(e.target.value)}
+            className="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Hasta"
+          />
+          <button
+            onClick={handleExport}
+            disabled={!filtroDesde || !filtroHasta}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors whitespace-nowrap"
+          >
+            Exportar
+          </button>
+        </div>
 
         <span className="text-sm text-slate-400 self-center ml-auto">
           {total} reclamo{total !== 1 ? 's' : ''}

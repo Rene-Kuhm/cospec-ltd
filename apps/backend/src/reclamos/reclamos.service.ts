@@ -265,4 +265,34 @@ export class ReclamosService {
       {} as Record<EstadoReclamo, number>,
     );
   }
+
+  async exportReclamos(filters: FilterReclamosDto) {
+    // Fetch all (no pagination) for export
+    const { data } = await this.findAll({ ...filters, page: 1, limit: 10000 }, Rol.ADMIN, '');
+
+    const rows = data.map((r) => ({
+      'N°': r.numeroReclamo,
+      'Cliente': r.nombre,
+      'Teléfono': r.telefono,
+      'Dirección': r.direccion,
+      'Servicio': r.servicioAfectado,
+      'Estado': r.estado,
+      'Fecha Recepción': new Date(r.fechaRecepcion).toLocaleDateString('es-AR'),
+      'Hora Recepción': r.horaRecepcion,
+      'Técnico': r.tecnico?.nombre ?? '—',
+      'Fecha Asignación': r.fechaAsignacion ? new Date(r.fechaAsignacion).toLocaleDateString('es-AR') : '—',
+      'Fecha Atención': r.fechaAtencion ? new Date(r.fechaAtencion).toLocaleDateString('es-AR') : '—',
+      'Hora Atención': r.horaAtencion ?? '—',
+      'Falla Encontrada': r.fallaEncontrada ?? '—',
+      'Materiales': r.materiales?.map((m) => `${m.cantidad}x ${m.descripcion}`).join(', ') ?? '—',
+    }));
+
+    const XLSX = require('xlsx');
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reclamos');
+
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    return buffer;
+  }
 }

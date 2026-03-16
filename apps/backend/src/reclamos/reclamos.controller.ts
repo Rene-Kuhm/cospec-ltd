@@ -9,7 +9,9 @@ import {
   Patch,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { Rol } from '@cospec/shared-types';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -40,6 +42,25 @@ export class ReclamosController {
   @Roles(Rol.ADMIN, Rol.OPERADOR)
   getStats() {
     return this.reclamosService.getStatsByEstado();
+  }
+
+  @Get('export')
+  @Roles(Rol.ADMIN, Rol.OPERADOR)
+  @HttpCode(HttpStatus.OK)
+  async exportReclamos(@Query() filters: FilterReclamosDto, @Res() res: Response) {
+    const buffer = await this.reclamosService.exportReclamos(filters);
+    
+    const desde = filters.desde ?? 'inicio';
+    const hasta = filters.hasta ?? 'fin';
+    const filename = `reclamos-${desde}_a_${hasta}.xlsx`;
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': buffer.length,
+    });
+
+    res.send(buffer);
   }
 
   @Get(':id')
