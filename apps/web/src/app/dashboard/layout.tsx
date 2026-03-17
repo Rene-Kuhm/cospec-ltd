@@ -1,4 +1,6 @@
 import { auth, signOut } from '@/auth';
+import { NotificationsBell } from '@/components/notifications/NotificationsBell';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 export default async function DashboardLayout({
@@ -10,38 +12,47 @@ export default async function DashboardLayout({
   if (!session) redirect('/login');
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <nav className="bg-white border-b border-slate-200 px-6 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <span className="font-bold text-slate-900">COSPEC LTD</span>
-              <span className="text-slate-300">|</span>
-              <span className="text-sm text-slate-500">Sistema de Reclamos</span>
+    <div className="min-h-screen px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        <nav className="app-shell-card px-5 py-5 sm:px-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-8">
+              <div>
+                <p className="app-shell-label">COSPEC LTD</p>
+                <p className="mt-2 text-lg font-semibold text-slate-50">Centro de reclamos</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/dashboard" className="app-shell-button-ghost rounded-full border border-white/10 px-4 py-2">
+                  Dashboard
+                </Link>
+                <Link href="/dashboard/reclamos" className="app-shell-button-ghost rounded-full border border-white/10 px-4 py-2">
+                  Reclamos
+                </Link>
+                <Link href="/dashboard/reclamos/nuevo" className="app-shell-button-ghost rounded-full border border-white/10 px-4 py-2">
+                  Alta rapida
+                </Link>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <a href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">
-                Inicio
-              </a>
-              <a href="/dashboard/reclamos" className="text-sm text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">
-                Reclamos
-              </a>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:justify-end">
+              <NotificationsBell />
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm">
+                <p className="font-medium text-slate-100">{session.user?.name}</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.22em] text-teal-300">
+                  {session.user?.rol ?? 'USER'}
+                </p>
+              </div>
+              <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
+                <button type="submit" className="app-shell-button-secondary w-full sm:w-auto">
+                  Cerrar sesion
+                </button>
+              </form>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-600">
-              {session.user?.name}
-              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                {session.user?.rol ?? 'USER'}
-              </span>
-            </span>
-            <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
-              <button type="submit" className="text-sm text-slate-500 hover:text-slate-700">Salir</button>
-            </form>
-          </div>
-        </div>
-      </nav>
-      <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
+        </nav>
+
+        <main className="pb-8">{children}</main>
+      </div>
     </div>
   );
 }

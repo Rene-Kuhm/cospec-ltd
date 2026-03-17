@@ -3,17 +3,18 @@ import { ReclamosList } from '../../../components/reclamos/ReclamosList';
 
 export default function ReclamosPage() {
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6">
+      <div className="app-shell-card flex flex-col gap-5 p-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Reclamos</h1>
-          <p className="text-slate-500 text-sm mt-1">Gestión de reclamos técnicos</p>
+          <p className="app-shell-label">Operacion</p>
+          <h1 className="mt-2 text-3xl font-semibold text-slate-50">Reclamos</h1>
+          <p className="mt-2 text-sm leading-6 text-slate-400">Bandeja para buscar, filtrar y asignar reclamos sin perder tiempo entrando al detalle.</p>
         </div>
         <Link
           href="/dashboard/reclamos/nuevo"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors"
+          className="app-shell-button"
         >
-          + Nuevo reclamo
+          Nuevo reclamo
         </Link>
       </div>
       <ReclamosList />

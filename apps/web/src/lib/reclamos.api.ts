@@ -2,22 +2,32 @@ import { apiFetch } from './api';
 import type {
   AddMaterialResponse,
   AsignarReclamoResponse,
+  AsignarTecnicoDto,
   CancelReclamoResponse,
   CreateReclamoDto,
   CreateReclamoResponse,
   EstadoReclamo,
+  GetCategoriasReclamoResponse,
+  GetOperadoresActivosResponse,
   GetReclamoDetalleResponse,
+  GetReclamoTimelineResponse,
   GetReclamosResponse,
   GetReclamosStatsResponse,
+  GetTecnicosActivosResponse,
   AddMaterialDto,
+  PrioridadReclamo,
   ResolverReclamoResponse,
   UpdateReclamoResponse,
 } from '@cospec/shared-types';
 
 export interface ReclamosFilter {
+  search?: string;
   estado?: string;
+  prioridad?: PrioridadReclamo;
+  categoria?: string;
   servicioAfectado?: string;
   tecnicoId?: string;
+  operadorId?: string;
   desde?: string;
   hasta?: string;
   page?: number;
@@ -39,12 +49,34 @@ export async function getReclamoById(id: string): Promise<GetReclamoDetalleRespo
   return apiFetch(`/reclamos/${id}`);
 }
 
+export async function getReclamoTimeline(id: string): Promise<GetReclamoTimelineResponse> {
+  return apiFetch(`/reclamos/${id}/timeline`);
+}
+
 export async function createReclamo(dto: CreateReclamoDto): Promise<CreateReclamoResponse> {
   return apiFetch('/reclamos', { method: 'POST', body: JSON.stringify(dto) });
 }
 
-export async function asignarReclamo(id: string): Promise<AsignarReclamoResponse> {
-  return apiFetch(`/reclamos/${id}/asignar`, { method: 'PATCH' });
+export async function asignarReclamo(
+  id: string,
+  dto: AsignarTecnicoDto,
+): Promise<AsignarReclamoResponse> {
+  return apiFetch(`/reclamos/${id}/asignacion`, {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
+
+export async function getTecnicosActivos(): Promise<GetTecnicosActivosResponse> {
+  return apiFetch('/reclamos/tecnicos/activos');
+}
+
+export async function getOperadoresActivos(): Promise<GetOperadoresActivosResponse> {
+  return apiFetch('/reclamos/operadores/activos');
+}
+
+export async function getCategoriasReclamo(): Promise<GetCategoriasReclamoResponse> {
+  return apiFetch('/reclamos/categorias');
 }
 
 export async function updateEstado(
