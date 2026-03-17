@@ -20,5 +20,13 @@ if (process.env['NODE_ENV'] !== 'production') {
 }
 
 export { PrismaClient } from '@prisma/client';
-export type { Usuario, Reclamo, MaterialUsado } from '@prisma/client';
-export { Rol, EstadoReclamo, ServicioAfectado } from '@prisma/client';
+export type {
+  Usuario,
+  Notificacion,
+  Reclamo,
+  MaterialUsado,
+  ReclamoEvento,
+  ReclamoMensaje,
+  ReclamoMensajeLectura,
+} from '@prisma/client';
+export { Rol, EstadoReclamo, ServicioAfectado, ReclamoEventoTipo, NotificationType } from '@prisma/client';

@@ -31,6 +31,31 @@ enum ServicioAfectado {
   TV_SENSA
 }
 
+enum PrioridadReclamo {
+  BAJA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum NotificationType {
+  RECLAMO_ASIGNADO
+  MENSAJE_INTERNO
+  RECLAMO_RESUELTO
+  RECLAMO_CANCELADO
+  CAMBIO_OPERATIVO
+}
+
+enum ReclamoEventoTipo {
+  CREADO
+  ASIGNACION_ADMINISTRATIVA
+  TOMADO
+  ESTADO_CAMBIADO
+  RESUELTO
+  CANCELADO
+  MATERIAL_AGREGADO
+}
+
 model Usuario {
   id        String   @id @default(cuid())
   nombre    String
@@ -42,10 +67,36 @@ model Usuario {
   updatedAt DateTime @updatedAt
 
   // Relations
-  reclamosCreados  Reclamo[] @relation("OperadorReclamos")
-  reclamosAsignados Reclamo[] @relation("TecnicoReclamos")
+  reclamosCreados      Reclamo[] @relation("OperadorReclamos")
+  reclamosAsignados    Reclamo[] @relation("TecnicoReclamos")
+  reclamosAsignadosPor Reclamo[] @relation("AsignadorReclamos")
+  reclamosActualizados Reclamo[] @relation("ActualizadorReclamos")
+  reclamoEventos       ReclamoEvento[] @relation("ActorReclamoEventos")
+  mensajesReclamo      ReclamoMensaje[] @relation("AutorReclamoMensajes")
+  lecturasMensaje      ReclamoMensajeLectura[]
+  notificaciones       Notificacion[]
 
   @@map("usuarios")
+}
+
+model Notificacion {
+  id         String           @id @default(cuid())
+  usuarioId  String
+  usuario    Usuario          @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo       NotificationType
+  titulo     String
+  mensaje    String
+  entidadTipo String          @default("RECLAMO")
+  entidadId  String?
+  metadata   Json?
+  dedupeKey  String
+  readAt     DateTime?
+  createdAt  DateTime         @default(now())
+
+  @@unique([usuarioId, dedupeKey])
+  @@index([usuarioId, createdAt])
+  @@index([usuarioId, readAt, createdAt])
+  @@map("notificaciones")
 }
 
 model Reclamo {
@@ -57,6 +108,9 @@ model Reclamo {
   direccion        String
   motivo           String
   servicioAfectado ServicioAfectado
+  prioridad        PrioridadReclamo @default(MEDIA)
+  categoria        String?
+  subcategoria     String?
   // Control de estado
   estado           EstadoReclamo   @default(PENDIENTE)
   // Recepción
@@ -68,18 +122,68 @@ model Reclamo {
   // Atención técnico
   tecnicoId        String?
   tecnico          Usuario?        @relation("TecnicoReclamos", fields: [tecnicoId], references: [id])
+  asignadoPorId    String?
+  asignadoPor      Usuario?        @relation("AsignadorReclamos", fields: [asignadoPorId], references: [id])
   fechaAsignacion  DateTime?
   fechaAtencion    DateTime?
   horaAtencion     String?
   fallaEncontrada  String?
+  updatedById      String?
+  updatedBy        Usuario?        @relation("ActualizadorReclamos", fields: [updatedById], references: [id])
   // Metadata
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
   // Relations
   materiales MaterialUsado[]
+  eventos    ReclamoEvento[]
+  mensajes   ReclamoMensaje[]
 
   @@map("reclamos")
+}
+
+model ReclamoMensaje {
+  id        String                 @id @default(cuid())
+  reclamoId String
+  reclamo   Reclamo                @relation(fields: [reclamoId], references: [id], onDelete: Cascade)
+  autorId   String
+  autor     Usuario                @relation("AutorReclamoMensajes", fields: [autorId], references: [id], onDelete: Cascade)
+  contenido String
+  createdAt DateTime               @default(now())
+
+  lecturas  ReclamoMensajeLectura[]
+
+  @@index([reclamoId, createdAt])
+  @@index([autorId])
+  @@map("reclamo_mensajes")
+}
+
+model ReclamoMensajeLectura {
+  mensajeId String
+  usuarioId String
+  readAt    DateTime @default(now())
+
+  mensaje ReclamoMensaje @relation(fields: [mensajeId], references: [id], onDelete: Cascade)
+  usuario Usuario        @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@id([mensajeId, usuarioId])
+  @@index([usuarioId, readAt])
+  @@map("reclamo_mensaje_lecturas")
+}
+
+model ReclamoEvento {
+  id        String            @id @default(cuid())
+  reclamoId String
+  reclamo   Reclamo           @relation(fields: [reclamoId], references: [id], onDelete: Cascade)
+  tipo      ReclamoEventoTipo
+  actorId   String?
+  actor     Usuario?          @relation("ActorReclamoEventos", fields: [actorId], references: [id], onDelete: SetNull)
+  payload   Json
+  createdAt DateTime          @default(now())
+
+  @@index([reclamoId, createdAt])
+  @@index([actorId])
+  @@map("reclamo_eventos")
 }
 
 model MaterialUsado {
