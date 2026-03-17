@@ -2,9 +2,12 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuthContext } from '../src/context/AuthContext';
 import { ConnectivityProvider } from '../src/context/ConnectivityContext';
+import { NotificationsProvider } from '../src/context/NotificationsContext';
 import { router, useSegments } from 'expo-router';
+import { theme } from '../src/theme';
 
 function RootNavigator() {
   const { isAuthenticated, isLoading } = useAuthContext();
@@ -29,9 +32,9 @@ function RootNavigator() {
   if (isLoading) {
     return (
       <View
-        style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}
+        style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.background }}
       >
-        <ActivityIndicator size="large" color="#1d4ed8" />
+        <ActivityIndicator size="large" color={theme.colors.accent} />
       </View>
     );
   }
@@ -41,20 +44,42 @@ function RootNavigator() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="reclamo/[id]" options={{ headerShown: true }} />
-        <Stack.Screen name="reclamo/[id]/resolver" options={{ headerShown: true }} />
+        <Stack.Screen
+          name="reclamo/[id]"
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: theme.colors.background },
+            headerTintColor: theme.colors.text,
+            headerShadowVisible: false,
+            contentStyle: { backgroundColor: theme.colors.background },
+          }}
+        />
+        <Stack.Screen
+          name="reclamo/[id]/resolver"
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: theme.colors.background },
+            headerTintColor: theme.colors.text,
+            headerShadowVisible: false,
+            contentStyle: { backgroundColor: theme.colors.background },
+          }}
+        />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </>
   );
 }
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <ConnectivityProvider>
-        <RootNavigator />
-      </ConnectivityProvider>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NotificationsProvider>
+          <ConnectivityProvider>
+            <RootNavigator />
+          </ConnectivityProvider>
+        </NotificationsProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

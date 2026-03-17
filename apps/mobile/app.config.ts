@@ -25,7 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: 'com.cospec.tecnicos',
   },
   extra: {
-    apiUrl: process.env['EXPO_PUBLIC_API_URL'] ?? 'http://localhost:3001/api',
+    apiUrl: process.env['EXPO_PUBLIC_API_URL'] ?? 'http://localhost:3001/api/v1',
     eas: {
       projectId: 'TBD',
     },

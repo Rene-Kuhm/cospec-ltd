@@ -21,12 +21,17 @@ export async function initDB(): Promise<SQLite.SQLiteDatabase> {
         direccion TEXT NOT NULL,
         motivo TEXT NOT NULL,
         servicioAfectado TEXT NOT NULL,
+        prioridad TEXT NOT NULL DEFAULT 'MEDIA',
+        categoria TEXT,
+        subcategoria TEXT,
         estado TEXT NOT NULL,
         horaRecepcion TEXT NOT NULL,
         fechaRecepcion TEXT NOT NULL,
         tecnicoId TEXT,
+        asignadoPorId TEXT,
         fallaEncontrada TEXT,
         pendingSync INTEGER DEFAULT 0,
+        updatedById TEXT,
         updatedAt TEXT NOT NULL
       );
 
@@ -40,6 +45,25 @@ export async function initDB(): Promise<SQLite.SQLiteDatabase> {
         errorMsg TEXT
       );
     `);
+
+    const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(reclamos_local)');
+    const columnNames = new Set(columns.map((column) => column.name));
+
+    if (!columnNames.has('prioridad')) {
+      await db.runAsync("ALTER TABLE reclamos_local ADD COLUMN prioridad TEXT NOT NULL DEFAULT 'MEDIA'");
+    }
+    if (!columnNames.has('categoria')) {
+      await db.runAsync('ALTER TABLE reclamos_local ADD COLUMN categoria TEXT');
+    }
+    if (!columnNames.has('subcategoria')) {
+      await db.runAsync('ALTER TABLE reclamos_local ADD COLUMN subcategoria TEXT');
+    }
+    if (!columnNames.has('asignadoPorId')) {
+      await db.runAsync('ALTER TABLE reclamos_local ADD COLUMN asignadoPorId TEXT');
+    }
+    if (!columnNames.has('updatedById')) {
+      await db.runAsync('ALTER TABLE reclamos_local ADD COLUMN updatedById TEXT');
+    }
 
     dbInstance = db;
     return db;

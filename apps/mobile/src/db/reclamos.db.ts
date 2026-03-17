@@ -1,4 +1,5 @@
 import { getDB } from './database';
+import type { PrioridadReclamo } from '@cospec/shared-types';
 
 export interface ReclamoRow {
   id: string;
@@ -8,12 +9,17 @@ export interface ReclamoRow {
   direccion: string;
   motivo: string;
   servicioAfectado: string;
+  prioridad: PrioridadReclamo;
+  categoria: string | null;
+  subcategoria: string | null;
   estado: string;
   horaRecepcion: string;
   fechaRecepcion: string;
   tecnicoId: string | null;
+  asignadoPorId: string | null;
   fallaEncontrada: string | null;
   pendingSync: number;
+  updatedById: string | null;
   updatedAt: string;
 }
 
@@ -24,14 +30,16 @@ export async function saveReclamos(reclamos: ReclamoRow[]): Promise<void> {
       await db.runAsync(
         `INSERT OR REPLACE INTO reclamos_local
           (id, numeroReclamo, nombre, telefono, direccion, motivo,
-           servicioAfectado, estado, horaRecepcion, fechaRecepcion,
-           tecnicoId, fallaEncontrada, pendingSync, updatedAt)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           servicioAfectado, prioridad, categoria, subcategoria, estado,
+           horaRecepcion, fechaRecepcion, tecnicoId, asignadoPorId,
+           fallaEncontrada, pendingSync, updatedById, updatedAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           r.id, r.numeroReclamo, r.nombre, r.telefono, r.direccion,
-          r.motivo, r.servicioAfectado, r.estado, r.horaRecepcion,
-          r.fechaRecepcion, r.tecnicoId ?? null, r.fallaEncontrada ?? null,
-          r.pendingSync ?? 0, r.updatedAt,
+          r.motivo, r.servicioAfectado, r.prioridad, r.categoria ?? null,
+          r.subcategoria ?? null, r.estado, r.horaRecepcion, r.fechaRecepcion,
+          r.tecnicoId ?? null, r.asignadoPorId ?? null, r.fallaEncontrada ?? null,
+          r.pendingSync ?? 0, r.updatedById ?? null, r.updatedAt,
         ],
       );
     }

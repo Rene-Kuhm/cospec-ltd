@@ -1,28 +1,50 @@
 import { Tabs } from 'expo-router';
+import { theme } from '../../src/theme';
+import { useNotifications } from '../../src/hooks/useNotifications';
 
 export default function TabLayout() {
+  const { unreadCount } = useNotifications();
+
   return (
     <Tabs
       screenOptions={{
         headerShadowVisible: false,
-        tabBarActiveTintColor: '#1d4ed8',
+        headerStyle: { backgroundColor: theme.colors.background },
+        headerTintColor: theme.colors.text,
+        headerTitleStyle: { fontWeight: '700' },
+        tabBarActiveTintColor: theme.colors.accent,
+        tabBarInactiveTintColor: theme.colors.textSoft,
         tabBarHideOnKeyboard: true,
-        tabBarStyle: { backgroundColor: '#ffffff' },
-        sceneStyle: { backgroundColor: '#f8fafc' },
+        tabBarStyle: {
+          backgroundColor: '#0c1628',
+          borderTopColor: theme.colors.border,
+          height: 72,
+          paddingTop: 8,
+          paddingBottom: 10,
+        },
+        sceneStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Reclamos',
-          headerTitle: 'COSPEC — Reclamos',
+          headerTitle: 'Mesa tecnica',
+        }}
+      />
+      <Tabs.Screen
+        name="notificaciones"
+        options={{
+          title: 'Avisos',
+          headerTitle: 'Notificaciones',
+          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
         }}
       />
       <Tabs.Screen
         name="perfil"
         options={{
-          title: 'Mi Perfil',
-          headerTitle: 'Mi Perfil',
+          title: 'Perfil',
+          headerTitle: 'Perfil operativo',
         }}
       />
     </Tabs>
