@@ -1,17 +1,27 @@
-import { DefaultSession, DefaultJWT } from 'next-auth';
+import NextAuth, { DefaultSession } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
+import { Rol } from '@cospec/shared-types';
 
 declare module 'next-auth' {
-  interface Session extends DefaultSession {
+  interface User {
+    id: string;
+    rol: Rol;
     accessToken: string;
-    user: {
-      id: string;
-      rol: string;
-    } & DefaultSession['user'];
   }
 
-  interface JWT extends DefaultJWT {
-    accessToken: string;
-    rol: string;
-    id: string;
+  interface Session extends DefaultSession {
+    accessToken?: string;
+    user: {
+      id: string;
+      rol?: Rol;
+    } & DefaultSession['user'];
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    accessToken?: string;
+    rol?: Rol;
+    id?: string;
   }
 }

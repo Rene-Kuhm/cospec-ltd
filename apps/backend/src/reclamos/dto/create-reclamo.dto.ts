@@ -1,5 +1,14 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { ServicioAfectado } from '@cospec/shared-types';
+
+const SERVICIO_AFECTADO_VALUES = ['FIBRA_OPTICA', 'ADSL', 'TELEFONIA', 'TV_SENSA'] as const;
+const PRIORIDAD_RECLAMO_VALUES = ['BAJA', 'MEDIA', 'ALTA', 'CRITICA'] as const;
 
 export class CreateReclamoDto {
   @IsString()
@@ -18,8 +27,20 @@ export class CreateReclamoDto {
   @IsNotEmpty({ message: 'El motivo es requerido' })
   motivo!: string;
 
-  @IsEnum(ServicioAfectado, { message: 'Servicio afectado inválido' })
+  @IsIn(SERVICIO_AFECTADO_VALUES, { message: 'Servicio afectado inválido' })
   servicioAfectado!: ServicioAfectado;
+
+  @IsOptional()
+  @IsIn(PRIORIDAD_RECLAMO_VALUES, { message: 'Prioridad inválida' })
+  prioridad?: (typeof PRIORIDAD_RECLAMO_VALUES)[number];
+
+  @IsOptional()
+  @IsString()
+  categoria?: string;
+
+  @IsOptional()
+  @IsString()
+  subcategoria?: string;
 
   @IsOptional()
   @IsString()

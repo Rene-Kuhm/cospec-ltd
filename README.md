@@ -48,6 +48,50 @@ pnpm db:generate
 pnpm db:migrate
 ```
 
+## Variables de entorno
+
+Cada app tiene su propio `.env.example`. Copiar a `.env` y completar:
+
+### `apps/backend/.env`
+```
+DATABASE_URL=postgresql://user:password@localhost:5432/cospec
+JWT_SECRET=your-secret-here
+NODE_ENV=development
+PORT=3001
+```
+
+### `apps/web/.env.local`
+```
+NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+API_URL=http://localhost:3001/api/v1
+AUTH_SECRET=cospec-web-dev-secret
+NODE_ENV=development
+```
+
+### `apps/mobile/.env`
+```
+EXPO_PUBLIC_API_URL=http://localhost:3001/api/v1
+```
+
+> `DATABASE_URL` solo existe en `apps/backend`. Web y mobile nunca conectan directo a PostgreSQL.
+
+## Estructura del monorepo
+
+```
+cospec-reclamos/
+├── apps/
+│   ├── backend/     # NestJS 11 — API REST
+│   ├── web/         # Next.js 15 — Panel admin
+│   └── mobile/      # Expo SDK 52 — App técnicos (Android)
+├── packages/
+│   ├── shared-types/  # @cospec/shared-types — interfaces y enums
+│   ├── shared-utils/  # @cospec/shared-utils — funciones puras
+│   └── db/           # @cospec/db — Prisma client + schema
+├── turbo.json
+├── pnpm-workspace.yaml
+└── tsconfig.base.json
+```
+
 ## Servicios soportados
 
 - Internet Fibra Óptica

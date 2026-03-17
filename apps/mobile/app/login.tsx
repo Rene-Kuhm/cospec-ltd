@@ -8,9 +8,12 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../src/hooks/useAuth';
 import { router } from 'expo-router';
+import { theme } from '../src/theme';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -37,115 +40,156 @@ export default function LoginScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <View style={styles.card}>
-        <Text style={styles.title}>COSPEC LTD</Text>
-        <Text style={styles.subtitle}>Panel de Técnicos</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+          <View style={styles.hero}>
+            <Text style={styles.eyebrow}>COSPEC LTD</Text>
+            <Text style={styles.title}>Acceso tecnico en campo</Text>
+            <Text style={styles.subtitle}>
+              Una base visual mas seria para trabajar reclamos, resolver offline y sincronizar sin caos.
+            </Text>
+          </View>
 
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            placeholderTextColor="#94a3b8"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Contraseña"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoComplete="password"
-            placeholderTextColor="#94a3b8"
-          />
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Ingresar</Text>
+            <Text style={styles.cardText}>Usa tu cuenta operativa para ver asignaciones y registrar resoluciones.</Text>
 
-          {error && <Text style={styles.error}>{error}</Text>}
+            <View style={styles.form}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                placeholderTextColor={theme.colors.textSoft}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Contraseña"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="password"
+                placeholderTextColor={theme.colors.textSoft}
+              />
 
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Ingresar</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+              {error && <Text style={styles.error}>{error}</Text>}
+
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? <ActivityIndicator color={theme.colors.textStrong} /> : <Text style={styles.buttonText}>Ingresar</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: theme.colors.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 24,
+    gap: 18,
+  },
+  hero: {
+    gap: 10,
+  },
+  eyebrow: {
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    color: theme.colors.accent,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.4,
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    backgroundColor: theme.colors.panel,
+    borderRadius: theme.radius.lg,
     padding: 32,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadow,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e3a8a',
-    textAlign: 'center',
+    fontSize: 34,
+    fontWeight: '700',
+    color: theme.colors.text,
   },
   subtitle: {
+    fontSize: 15,
+    lineHeight: 24,
+    color: theme.colors.textMuted,
+  },
+  cardTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: theme.colors.text,
+  },
+  cardText: {
+    marginTop: 8,
+    marginBottom: 24,
     fontSize: 14,
-    color: '#64748b',
-    textAlign: 'center',
-    marginTop: 4,
-    marginBottom: 32,
+    lineHeight: 22,
+    color: theme.colors.textMuted,
   },
   form: {
-    gap: 12,
+    gap: 14,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 10,
+    borderColor: theme.colors.borderStrong,
+    borderRadius: theme.radius.md,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     fontSize: 15,
-    color: '#1e293b',
-    backgroundColor: '#f8fafc',
+    color: theme.colors.text,
+    backgroundColor: 'rgba(8, 17, 29, 0.45)',
   },
   error: {
-    color: '#dc2626',
+    color: '#fecaca',
     fontSize: 13,
-    textAlign: 'center',
+    backgroundColor: 'rgba(248, 113, 113, 0.12)',
+    borderRadius: theme.radius.sm,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   button: {
-    backgroundColor: '#1d4ed8',
-    borderRadius: 10,
-    paddingVertical: 14,
+    backgroundColor: theme.colors.accent,
+    borderRadius: theme.radius.md,
+    paddingVertical: 16,
     alignItems: 'center',
     marginTop: 8,
   },
   buttonDisabled: {
-    backgroundColor: '#93c5fd',
+    opacity: 0.58,
   },
   buttonText: {
-    color: '#ffffff',
-    fontWeight: '600',
+    color: theme.colors.textStrong,
+    fontWeight: '700',
     fontSize: 16,
   },
 });
