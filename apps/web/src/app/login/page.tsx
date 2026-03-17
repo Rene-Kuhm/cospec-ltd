@@ -2,12 +2,19 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const accessError = searchParams.get('error');
+  const accessErrorMessage = accessError === 'role-denied'
+    ? 'Este acceso web es solo para administradores y operadores.'
+    : null;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -27,7 +34,11 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result?.error) {
-      setError('Email o contraseña incorrectos');
+      setError(
+        result.error === 'AccessDenied'
+          ? 'Este acceso web es solo para administradores y operadores.'
+          : 'Email o contraseña incorrectos',
+      );
       return;
     }
 
@@ -77,9 +88,9 @@ export default function LoginPage() {
               />
             </div>
 
-            {error && (
+            {(error ?? accessErrorMessage) && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">
-                {error}
+                {error ?? accessErrorMessage}
               </div>
             )}
 

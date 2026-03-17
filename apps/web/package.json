@@ -1,5 +1,5 @@
 {
-  "name": "@cospec/web",
+  "name": "web",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -15,7 +15,9 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@cospec/shared-types": "workspace:*",
-    "@cospec/shared-utils": "workspace:*"
+    "@cospec/shared-utils": "workspace:*",
+    "@t3-oss/env-nextjs": "^0.10.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

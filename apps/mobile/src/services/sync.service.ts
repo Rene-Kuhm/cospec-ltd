@@ -5,6 +5,16 @@ import { reclamosService } from './reclamos.service';
 
 const RETRY_DELAYS_MS = [1000, 2000, 4000];
 
+export interface SyncFailedItem {
+  reclamoId: string;
+  accion: string;
+  error: string;
+}
+
+export interface SyncResult {
+  failed: SyncFailedItem[];
+}
+
 function isBizError(err: unknown): boolean {
   return (
     axios.isAxiosError(err) &&
@@ -38,9 +48,11 @@ async function callApiWithRetry(
   throw lastErr;
 }
 
-export async function processSyncQueue(): Promise<void> {
+export async function processSyncQueue(): Promise<SyncResult> {
   const queue = await getQueue();
-  if (queue.length === 0) return;
+  const failed: SyncFailedItem[] = [];
+
+  if (queue.length === 0) return { failed };
 
   console.log(`[Sync] Processing ${queue.length} pending actions...`);
 
@@ -69,7 +81,10 @@ export async function processSyncQueue(): Promise<void> {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       await markError(item.id, msg);
       console.warn(`[Sync] ❌ ${item.accion} for ${item.reclamoId}: ${msg}`);
+      failed.push({ reclamoId: item.reclamoId, accion: item.accion, error: msg });
       // Continue FIFO — skip this item, process next
     }
   }
+
+  return { failed };
 }

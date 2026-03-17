@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { CreateReclamoDto, CreateReclamoResponse } from '@cospec/shared-types';
 import { ServicioAfectado } from '@cospec/shared-types';
 import { SERVICIO_LABELS } from '@cospec/shared-utils';
 import { useSession } from 'next-auth/react';
@@ -20,7 +21,7 @@ export function ReclamoForm() {
     setLoading(true);
 
     const form = new FormData(e.currentTarget);
-    const dto = {
+    const dto: CreateReclamoDto = {
       telefono: form.get('telefono') as string,
       nombre: form.get('nombre') as string,
       direccion: form.get('direccion') as string,
@@ -43,6 +44,8 @@ export function ReclamoForm() {
         const err = await res.json() as { message?: string };
         throw new Error(err.message ?? 'Error al crear reclamo');
       }
+
+      await res.json() as CreateReclamoResponse;
 
       router.push('/dashboard/reclamos');
       router.refresh();

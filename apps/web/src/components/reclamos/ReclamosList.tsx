@@ -13,39 +13,56 @@ export function ReclamosList() {
   const [filtroServicio, setFiltroServicio] = useState('');
   const [filtroDesde, setFiltroDesde] = useState('');
   const [filtroHasta, setFiltroHasta] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const { data: session } = useSession();
 
   const { reclamos, total, isLoading, error } = useReclamos({
     estado: filtroEstado || undefined,
     servicioAfectado: filtroServicio || undefined,
+    desde: filtroDesde || undefined,
+    hasta: filtroHasta || undefined,
   });
 
   async function handleExport() {
-    if (!filtroDesde || !filtroHasta) return;
-    if (!session?.accessToken) return;
-    
-    const params = new URLSearchParams({
-      desde: filtroDesde,
-      hasta: filtroHasta,
-      ...(filtroEstado && { estado: filtroEstado }),
-      ...(filtroServicio && { servicioAfectado: filtroServicio }),
-    });
-    
-    const url = `${process.env['NEXT_PUBLIC_API_URL']}/reclamos/export?${params}`;
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${session.accessToken}` },
-    });
-    
-    if (!res.ok) {
-      alert('Error al exportar');
+    setExportError(null);
+
+    if (!filtroDesde || !filtroHasta) {
+      setExportError('Seleccioná un rango de fechas para exportar');
       return;
     }
-    
-    const blob = await res.blob();
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `reclamos-${filtroDesde}_a_${filtroHasta}.xlsx`;
-    link.click();
+    if (!session?.accessToken) return;
+
+    setIsExporting(true);
+    try {
+      const params = new URLSearchParams({
+        desde: filtroDesde,
+        hasta: filtroHasta,
+        ...(filtroEstado && { estado: filtroEstado }),
+        ...(filtroServicio && { servicioAfectado: filtroServicio }),
+      });
+
+      const url = `${process.env['NEXT_PUBLIC_API_URL']}/reclamos/export?${params}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${session.accessToken}` },
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { message?: string };
+        setExportError(body.message ?? 'Error al exportar. Intentá de nuevo.');
+        return;
+      }
+
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `reclamos-${filtroDesde}_a_${filtroHasta}.xlsx`;
+      link.click();
+    } catch {
+      setExportError('Error de red al exportar. Intentá de nuevo.');
+    } finally {
+      setIsExporting(false);
+    }
   }
 
   return (
@@ -91,10 +108,10 @@ export function ReclamosList() {
           />
           <button
             onClick={handleExport}
-            disabled={!filtroDesde || !filtroHasta}
+            disabled={isExporting}
             className="bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors whitespace-nowrap"
           >
-            Exportar
+            {isExporting ? 'Exportando...' : 'Exportar'}
           </button>
         </div>
 
@@ -102,6 +119,13 @@ export function ReclamosList() {
           {total} reclamo{total !== 1 ? 's' : ''}
         </span>
       </div>
+
+      {/* Error de exportación */}
+      {exportError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
+          {exportError}
+        </div>
+      )}
 
       {/* Estado */}
       {isLoading && (
@@ -139,7 +163,7 @@ export function ReclamosList() {
                 reclamos.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-slate-500">
-                      {String((r as any).numeroReclamo ?? r.id.slice(-6))}
+                      {r.numeroReclamo}
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-slate-900">{r.nombre}</div>
@@ -152,7 +176,7 @@ export function ReclamosList() {
                       <EstadoBadge estado={r.estado} />
                     </td>
                     <td className="px-4 py-3 text-slate-500">
-                      {(r as { tecnico?: { nombre: string } }).tecnico?.nombre ?? '—'}
+                      {r.tecnico?.nombre ?? '—'}
                     </td>
                     <td className="px-4 py-3 text-slate-500 text-xs">
                       {formatFecha(new Date(r.fechaRecepcion))}

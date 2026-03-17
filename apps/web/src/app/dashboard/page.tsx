@@ -1,15 +1,16 @@
 import { auth } from '@/auth';
+import { EstadoReclamo, type GetReclamosStatsResponse } from '@cospec/shared-types';
 
 const API_BASE = process.env['API_URL'] ?? 'http://localhost:3001/api/v1';
 
 const STATS_CONFIG = [
-  { key: 'PENDIENTE', label: 'Pendientes', color: 'text-yellow-600' },
-  { key: 'ASIGNADO', label: 'Asignados', color: 'text-blue-600' },
-  { key: 'EN_PROGRESO', label: 'En progreso', color: 'text-orange-600' },
-  { key: 'RESUELTO', label: 'Resueltos', color: 'text-green-600' },
+  { key: EstadoReclamo.PENDIENTE, label: 'Pendientes', color: 'text-yellow-600' },
+  { key: EstadoReclamo.ASIGNADO, label: 'Asignados', color: 'text-blue-600' },
+  { key: EstadoReclamo.EN_PROGRESO, label: 'En progreso', color: 'text-orange-600' },
+  { key: EstadoReclamo.RESUELTO, label: 'Resueltos', color: 'text-green-600' },
 ];
 
-async function getStats(token: string): Promise<Record<string, number>> {
+async function getStats(token: string): Promise<GetReclamosStatsResponse> {
   try {
     const res = await fetch(`${API_BASE}/reclamos/stats`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -23,7 +24,7 @@ async function getStats(token: string): Promise<Record<string, number>> {
 }
 
 export default async function DashboardPage() {
-  const session: any = await auth();
+  const session = await auth();
   const stats = session?.accessToken ? await getStats(session.accessToken) : {};
 
   return (

@@ -1,26 +1,9 @@
-import { EstadoReclamo } from '@cospec/shared-types';
+import type { ReclamoDetalle as ReclamoDetalleType } from '@cospec/shared-types';
 import { SERVICIO_LABELS, formatFecha } from '@cospec/shared-utils';
 import { EstadoBadge } from './EstadoBadge';
 
 interface ReclamoDetailProps {
-  reclamo: {
-    id: string;
-    numeroReclamo: string;
-    telefono: string;
-    nombre: string;
-    direccion: string;
-    motivo: string;
-    servicioAfectado: string;
-    estado: EstadoReclamo;
-    fechaRecepcion: string;
-    horaRecepcion: string;
-    fallaEncontrada?: string | null;
-    horaAtencion?: string | null;
-    fechaAtencion?: string | null;
-    operador?: { nombre: string } | null;
-    tecnico?: { nombre: string } | null;
-    materiales?: { id: string; descripcion: string; cantidad: number }[];
-  };
+  reclamo: ReclamoDetalleType;
 }
 
 export function ReclamoDetail({ reclamo }: ReclamoDetailProps) {

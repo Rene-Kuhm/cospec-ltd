@@ -1,18 +1,19 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { GetReclamoDetalleResponse } from '@cospec/shared-types';
 import { auth } from '@/auth';
 import { ReclamoDetail } from '../../../../components/reclamos/ReclamoDetail';
 
 const API_BASE = process.env['API_URL'] ?? 'http://localhost:3001/api/v1';
 
-async function getReclamo(id: string, token: string) {
+async function getReclamo(id: string, token: string): Promise<GetReclamoDetalleResponse | null> {
   const res = await fetch(`${API_BASE}/reclamos/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error('Error al cargar reclamo');
-  return res.json();
+  return res.json() as Promise<GetReclamoDetalleResponse>;
 }
 
 export default async function ReclamoDetailPage({
@@ -21,7 +22,7 @@ export default async function ReclamoDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session: any = await auth();
+  const session = await auth();
   if (!session) return notFound();
 
   const reclamo = await getReclamo(id, session.accessToken ?? '');

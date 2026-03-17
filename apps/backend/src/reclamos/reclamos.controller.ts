@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -21,6 +22,7 @@ import { UpdateEstadoDto } from './dto/update-estado.dto';
 import { ResolverReclamoDto } from './dto/resolver-reclamo.dto';
 import { AddMaterialDto } from './dto/add-material.dto';
 import { FilterReclamosDto } from './dto/filter-reclamos.dto';
+import { ExportReclamosDto } from './dto/export-reclamos.dto';
 import { Usuario } from '@prisma/client';
 
 @Controller('reclamos')
@@ -47,12 +49,14 @@ export class ReclamosController {
   @Get('export')
   @Roles(Rol.ADMIN, Rol.OPERADOR)
   @HttpCode(HttpStatus.OK)
-  async exportReclamos(@Query() filters: FilterReclamosDto, @Res() res: Response) {
+  async exportReclamos(@Query() filters: ExportReclamosDto, @Res() res: Response) {
+    if (new Date(filters.desde) > new Date(filters.hasta)) {
+      throw new BadRequestException('Fecha desde debe ser menor o igual a hasta');
+    }
+
     const buffer = await this.reclamosService.exportReclamos(filters);
-    
-    const desde = filters.desde ?? 'inicio';
-    const hasta = filters.hasta ?? 'fin';
-    const filename = `reclamos-${desde}_a_${hasta}.xlsx`;
+
+    const filename = `reclamos-${filters.desde}_a_${filters.hasta}.xlsx`;
 
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

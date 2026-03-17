@@ -19,6 +19,11 @@ packages/db/node_modules/.prisma/
 .env
 .env.local
 .env.*.local
+apps/**/.env
+apps/**/.env.local
+
+# Generated
+generated/
 
 # Logs
 *.log

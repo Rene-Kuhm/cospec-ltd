@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as XLSX from 'xlsx';
 import { EstadoReclamo, Rol } from '@cospec/shared-types';
 import { isValidTransition } from '@cospec/shared-utils';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,6 +14,7 @@ import { UpdateEstadoDto } from './dto/update-estado.dto';
 import { ResolverReclamoDto } from './dto/resolver-reclamo.dto';
 import { AddMaterialDto } from './dto/add-material.dto';
 import { FilterReclamosDto } from './dto/filter-reclamos.dto';
+import { ExportReclamosDto } from './dto/export-reclamos.dto';
 import { Usuario } from '@prisma/client';
 
 @Injectable()
@@ -97,7 +99,6 @@ export class ReclamosService {
         include: {
           operador: { select: { id: true, nombre: true } },
           tecnico: { select: { id: true, nombre: true } },
-          materiales: true,
         },
       }),
       this.prisma.reclamo.count({ where }),
@@ -266,33 +267,58 @@ export class ReclamosService {
     );
   }
 
-  async exportReclamos(filters: FilterReclamosDto) {
-    // Fetch all (no pagination) for export
-    const { data } = await this.findAll({ ...filters, page: 1, limit: 10000 }, Rol.ADMIN, '');
+  async exportReclamos(filters: ExportReclamosDto): Promise<Buffer> {
+    const where: Record<string, unknown> = {
+      fechaRecepcion: {
+        gte: new Date(filters.desde),
+        lte: new Date(filters.hasta),
+      },
+    };
+
+    if (filters.estado) where['estado'] = filters.estado;
+    if (filters.servicioAfectado) where['servicioAfectado'] = filters.servicioAfectado;
+
+    const data = await this.prisma.reclamo.findMany({
+      where,
+      orderBy: { fechaRecepcion: 'asc' },
+      include: {
+        tecnico: { select: { id: true, nombre: true } },
+        materiales: true,
+      },
+    });
+
+    const headers = [
+      'N°', 'Cliente', 'Telefono', 'Direccion', 'Servicio', 'Estado',
+      'Fecha Recepcion', 'Hora Recepcion', 'Tecnico Asignado', 'Fecha Asignacion',
+      'Fecha Atencion', 'Hora Atencion', 'Falla Encontrada', 'Materiales',
+    ];
 
     const rows = data.map((r) => ({
       'N°': r.numeroReclamo,
       'Cliente': r.nombre,
-      'Teléfono': r.telefono,
-      'Dirección': r.direccion,
+      'Telefono': r.telefono,
+      'Direccion': r.direccion,
       'Servicio': r.servicioAfectado,
       'Estado': r.estado,
-      'Fecha Recepción': new Date(r.fechaRecepcion).toLocaleDateString('es-AR'),
-      'Hora Recepción': r.horaRecepcion,
-      'Técnico': r.tecnico?.nombre ?? '—',
-      'Fecha Asignación': r.fechaAsignacion ? new Date(r.fechaAsignacion).toLocaleDateString('es-AR') : '—',
-      'Fecha Atención': r.fechaAtencion ? new Date(r.fechaAtencion).toLocaleDateString('es-AR') : '—',
-      'Hora Atención': r.horaAtencion ?? '—',
+      'Fecha Recepcion': new Date(r.fechaRecepcion).toLocaleDateString('es-AR'),
+      'Hora Recepcion': r.horaRecepcion,
+      'Tecnico Asignado': r.tecnico?.nombre ?? '—',
+      'Fecha Asignacion': r.fechaAsignacion ? new Date(r.fechaAsignacion).toLocaleDateString('es-AR') : '—',
+      'Fecha Atencion': r.fechaAtencion ? new Date(r.fechaAtencion).toLocaleDateString('es-AR') : '—',
+      'Hora Atencion': r.horaAtencion ?? '—',
       'Falla Encontrada': r.fallaEncontrada ?? '—',
       'Materiales': r.materiales?.map((m) => `${m.cantidad}x ${m.descripcion}`).join(', ') ?? '—',
     }));
 
-    const XLSX = require('xlsx');
-    const worksheet = XLSX.utils.json_to_sheet(rows);
+    let worksheet;
+    if (rows.length === 0) {
+      worksheet = XLSX.utils.aoa_to_sheet([headers]);
+    } else {
+      worksheet = XLSX.utils.json_to_sheet(rows);
+    }
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Reclamos');
 
-    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
-    return buffer;
+    return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
   }
 }

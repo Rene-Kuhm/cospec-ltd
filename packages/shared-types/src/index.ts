@@ -41,30 +41,35 @@ export interface MaterialUsado {
   cantidad: number;
 }
 
-export interface Reclamo {
+export type ReclamoUsuarioRef = Pick<Usuario, 'id' | 'nombre'> & {
+  email?: string;
+};
+
+export type ReclamoDateValue = Date | string;
+
+export type ReclamoListadoUsuarioRef = Pick<ReclamoUsuarioRef, 'id' | 'nombre'>;
+
+export interface ReclamoResumen {
   id: string;
-  // Datos del cliente
+  numeroReclamo: string;
   telefono: string;
   nombre: string;
   direccion: string;
   motivo: string;
   servicioAfectado: ServicioAfectado;
-  // Control de estado
   estado: EstadoReclamo;
-  // Recepción (operador)
-  fechaRecepcion: Date;
-  horaRecepcion: string; // HH:mm format
+  fechaRecepcion: ReclamoDateValue;
+  horaRecepcion: string;
   operadorId: string;
-  // Atención (técnico)
-  tecnicoId?: string;
-  fechaAsignacion?: Date;
-  fechaAtencion?: Date;
-  horaAtencion?: string;
-  fallaEncontrada?: string;
-  materialesUsados?: MaterialUsado[];
-  // Metadata
-  createdAt: Date;
-  updatedAt: Date;
+  operador?: ReclamoListadoUsuarioRef | null;
+  tecnicoId?: string | null;
+  tecnico?: ReclamoListadoUsuarioRef | null;
+  fechaAsignacion?: ReclamoDateValue | null;
+  fechaAtencion?: ReclamoDateValue | null;
+  horaAtencion?: string | null;
+  fallaEncontrada?: string | null;
+  createdAt: ReclamoDateValue;
+  updatedAt: ReclamoDateValue;
 }
 
 // DTOs for API communication
@@ -74,6 +79,7 @@ export interface CreateReclamoDto {
   direccion: string;
   motivo: string;
   servicioAfectado: ServicioAfectado;
+  horaRecepcion?: string;
 }
 
 export interface UpdateReclamoDto {
@@ -105,15 +111,39 @@ export interface PaginatedResponse<T> {
   limit: number;
 }
 
+export type ReclamoMutacionBase = Omit<ReclamoResumen, 'operador' | 'tecnico'>;
+
+export type GetReclamosResponse = PaginatedResponse<ReclamoResumen>;
+
+export type GetReclamosStatsResponse = Partial<Record<EstadoReclamo, number>>;
+
 export interface ExportFilter {
   desde: Date;
   hasta: Date;
   tipo: 'semana' | 'mes';
 }
 
-export interface ReclamoDetalle extends Reclamo {
-  numeroReclamo: string;
-  operador: Pick<Usuario, 'id' | 'nombre'>;
-  tecnico?: Pick<Usuario, 'id' | 'nombre'>;
+export interface ReclamoDetalle extends Omit<ReclamoResumen, 'operador' | 'tecnico'> {
+  operador: ReclamoUsuarioRef;
+  tecnico?: ReclamoUsuarioRef | null;
   materiales: MaterialUsado[];
 }
+
+export type GetReclamoDetalleResponse = ReclamoDetalle;
+
+export type CreateReclamoResponse = ReclamoDetalle;
+
+export interface AsignarReclamoResponse extends ReclamoMutacionBase {
+  tecnico: ReclamoListadoUsuarioRef;
+  materiales: MaterialUsado[];
+}
+
+export type UpdateReclamoResponse = ReclamoMutacionBase;
+
+export interface ResolverReclamoResponse extends ReclamoMutacionBase {
+  materiales: MaterialUsado[];
+}
+
+export type CancelReclamoResponse = ReclamoMutacionBase;
+
+export type AddMaterialResponse = MaterialUsado;

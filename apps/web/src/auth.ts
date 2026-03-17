@@ -1,7 +1,17 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import { Rol } from '@cospec/shared-types';
 
 const API_URL = process.env['API_URL'] ?? 'http://localhost:3001/api/v1';
+const WEB_ALLOWED_ROLES = new Set<Rol>([Rol.ADMIN, Rol.OPERADOR]);
+
+type AuthenticatedUser = {
+  id: string;
+  name: string;
+  email: string;
+  rol: Rol;
+  accessToken: string;
+};
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env['AUTH_SECRET'] ?? 'development-secret-change-in-production',
@@ -11,7 +21,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: 'Email', type: 'email' },
         password: { label: 'Contraseña', type: 'password' },
       },
-      async authorize(credentials: any) {
+      async authorize(credentials): Promise<AuthenticatedUser | null> {
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
@@ -26,7 +36,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           if (!res.ok) return null;
 
-          const data = await res.json();
+          const data = await res.json() as {
+            accessToken: string;
+            user: {
+              id: string;
+              nombre: string;
+              email: string;
+              rol: Rol;
+            };
+          };
+
           return {
             id: data.user.id,
             name: data.user.nombre,
@@ -41,18 +60,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async signIn({ user }) {
+      return WEB_ALLOWED_ROLES.has(user.rol as Rol);
+    },
+    async jwt({ token, user }) {
       if (user) {
         token.accessToken = user.accessToken;
-        token.rol = user.rol;
+        token.rol = user.rol as Rol;
         token.id = user.id;
       }
       return token;
     },
-    async session({ session, token }: any) {
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
-        session.user.rol = token.rol;
+        session.user.id = token.id ?? '';
+        if (token.rol) {
+          session.user.rol = token.rol;
+        }
       }
       session.accessToken = token.accessToken;
       return session;
