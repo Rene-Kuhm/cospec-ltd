@@ -62,13 +62,15 @@ PORT=3001
 
 ### `apps/web/.env.local`
 ```
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
+NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+API_URL=http://localhost:3001/api/v1
+AUTH_SECRET=cospec-web-dev-secret
 NODE_ENV=development
 ```
 
 ### `apps/mobile/.env`
 ```
-EXPO_PUBLIC_API_URL=http://localhost:3001/api
+EXPO_PUBLIC_API_URL=http://localhost:3001/api/v1
 ```
 
 > `DATABASE_URL` solo existe en `apps/backend`. Web y mobile nunca conectan directo a PostgreSQL.
