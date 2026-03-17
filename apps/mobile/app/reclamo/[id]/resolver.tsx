@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
-import { useAuth } from '../../../../src/hooks/useAuth';
-import { MaterialItem, type MaterialEntry } from '../../../../src/components/MaterialItem';
-import { api } from '../../../../src/lib/api';
+import { useAuth } from '../../../src/hooks/useAuth';
+import { MaterialItem, type MaterialEntry } from '../../../src/components/MaterialItem';
+import { api } from '../../../src/lib/api';
 
 export default function ResolverScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

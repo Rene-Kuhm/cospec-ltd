@@ -5,11 +5,19 @@
     "moduleResolution": "node",
     "target": "ES2021",
     "outDir": "./dist",
-    "rootDir": "./src",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "incremental": true,
-    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "baseUrl": ".",
+    "paths": {
+      "@cospec/db": ["../../packages/db/src/index.ts"],
+      "@cospec/db/*": ["../../packages/db/src/*"],
+      "@cospec/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@cospec/shared-types/*": ["../../packages/shared-types/src/*"],
+      "@cospec/shared-utils": ["../../packages/shared-utils/src/index.ts"],
+      "@cospec/shared-utils/*": ["../../packages/shared-utils/src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

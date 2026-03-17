@@ -139,7 +139,7 @@ export function ReclamosList() {
                 reclamos.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-slate-500">
-                      {r.numeroReclamo}
+                      {String((r as any).numeroReclamo ?? r.id.slice(-6))}
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-slate-900">{r.nombre}</div>

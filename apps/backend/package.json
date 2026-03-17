@@ -19,6 +19,8 @@
     "@nestjs/passport": "^10.0.0",
     "@cospec/db": "workspace:*",
     "@cospec/shared-types": "workspace:*",
+    "@cospec/shared-utils": "workspace:*",
+    "@prisma/client": "^5.22.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "bcryptjs": "^2.4.3",
@@ -37,6 +39,11 @@
     "@types/bcryptjs": "^2.4.6",
     "ts-node": "^10.9.0",
     "typescript": "^5.5.0"
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

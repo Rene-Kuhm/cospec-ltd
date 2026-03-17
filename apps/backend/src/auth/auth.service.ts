@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
-import { AuthResponse } from '@cospec/shared-types';
+import { AuthResponse, Rol } from '@cospec/shared-types';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +26,7 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email, rol: user.rol };
     const accessToken = this.jwtService.sign(payload);
     const { password: _pw, createdAt: _ca, updatedAt: _ua, ...safeUser } = user;
-    return { accessToken, user: safeUser };
+    return { accessToken, user: { ...safeUser, rol: safeUser.rol as Rol } };
   }
 
   async getMe(userId: string) {

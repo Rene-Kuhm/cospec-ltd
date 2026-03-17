@@ -6,7 +6,7 @@ import {
   Body,
   Param,
 } from '@nestjs/common';
-import { Rol } from '@prisma/client';
+import { Rol } from '@cospec/shared-types';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Roles } from '../auth/decorators/roles.decorator';

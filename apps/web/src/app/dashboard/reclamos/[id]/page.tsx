@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { auth } from '../../../../auth';
+import { auth } from '@/auth';
 import { ReclamoDetail } from '../../../../components/reclamos/ReclamoDetail';
 
 const API_BASE = process.env['API_URL'] ?? 'http://localhost:3001/api/v1';
@@ -21,10 +21,10 @@ export default async function ReclamoDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = await auth();
+  const session: any = await auth();
   if (!session) return notFound();
 
-  const reclamo = await getReclamo(id, session.accessToken);
+  const reclamo = await getReclamo(id, session.accessToken ?? '');
   if (!reclamo) return notFound();
 
   return (

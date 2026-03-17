@@ -7,7 +7,11 @@ const COLORS: Record<string, { bg: string; text: string; label: string }> = {
   CANCELADO: { bg: '#f1f5f9', text: '#64748b', label: 'Cancelado' },
 };
 export function EstadoBadge({ estado }: { estado: string }) {
-  const c = COLORS[estado] ?? COLORS.CANCELADO;
-  return <View style={[styles.badge, { backgroundColor: c.bg }]}><Text style={[styles.text, { color: c.text }]}>{c.label}</Text></View>;
+  const colorConfig = COLORS[estado] ?? COLORS.PENDIENTE;
+  return (
+    <View style={[styles.badge, { backgroundColor: colorConfig.bg }]}>
+      <Text style={[styles.text, { color: colorConfig.text }]}>{colorConfig.label}</Text>
+    </View>
+  );
 }
 const styles = StyleSheet.create({ badge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20, alignSelf: 'flex-start' }, text: { fontSize: 11, fontWeight: '600' } });

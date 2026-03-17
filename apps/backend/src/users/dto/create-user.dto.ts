@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
-import { Rol } from '@prisma/client';
+import { Rol } from '@cospec/shared-types';
 
 export class CreateUserDto {
   @IsString()

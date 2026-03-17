@@ -4,13 +4,14 @@ import Credentials from 'next-auth/providers/credentials';
 const API_URL = process.env['API_URL'] ?? 'http://localhost:3001/api/v1';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env['AUTH_SECRET'] ?? 'development-secret-change-in-production',
   providers: [
     Credentials({
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Contraseña', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
@@ -25,7 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           if (!res.ok) return null;
 
-          const data = await res.json() as { accessToken: string; user: { id: string; nombre: string; email: string; rol: string; activo: boolean } };
+          const data = await res.json();
           return {
             id: data.user.id,
             name: data.user.nombre,
@@ -40,18 +41,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
-        token['accessToken'] = (user as { accessToken?: string }).accessToken;
-        token['rol'] = (user as { rol?: string }).rol;
-        token['id'] = user.id;
+        token.accessToken = user.accessToken;
+        token.rol = user.rol;
+        token.id = user.id;
       }
       return token;
     },
-    async session({ session, token }) {
-      session.user.id = token['id'] as string;
-      session.user.rol = token['rol'] as string;
-      (session as { accessToken?: string }).accessToken = token['accessToken'] as string;
+    async session({ session, token }: any) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.rol = token.rol;
+      }
+      session.accessToken = token.accessToken;
       return session;
     },
   },
@@ -60,6 +63,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   session: {
     strategy: 'jwt',
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60,
   },
 });

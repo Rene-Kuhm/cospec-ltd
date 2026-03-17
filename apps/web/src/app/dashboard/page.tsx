@@ -23,13 +23,13 @@ async function getStats(token: string): Promise<Record<string, number>> {
 }
 
 export default async function DashboardPage() {
-  const session = await auth();
-  const stats = session ? await getStats(session.accessToken) : {};
+  const session: any = await auth();
+  const stats = session?.accessToken ? await getStats(session.accessToken) : {};
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-slate-900 mb-2">
-        Bienvenido, {session?.user.name}
+        Bienvenido, {session?.user?.name ?? 'Usuario'}
       </h1>
       <p className="text-slate-500 mb-8">Panel de gestión de reclamos — COSPEC LTD</p>
 
