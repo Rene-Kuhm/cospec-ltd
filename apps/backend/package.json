@@ -8,6 +8,7 @@
     "start": "node dist/main",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "verify:notifications": "ts-node verification/notifications.behavior-check.ts",
     "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
